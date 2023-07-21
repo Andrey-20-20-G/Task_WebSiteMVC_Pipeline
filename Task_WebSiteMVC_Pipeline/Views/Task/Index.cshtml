@@ -1,0 +1,60 @@
+﻿@using Task_WebSiteMVC_Pipeline.Domain.Enum;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<h4 class="mb-3 text-muted">
+    Создать задачу
+</h4>
+    <form id="createTaskForm">
+        <div class="mb-3">
+            <label class="form-label">
+                Название задачи
+            </label>
+            <input class="form-control" type="text" name="name"/>
+        </div>
+        <label class="form-label">
+            Период выполнения задачи
+        </label>
+    <select class="form-select mb-3" name="type" asp-items="Html.GetEnumSelectList<Task_TimeSpend>()"></select>
+        <div class="mb-3">
+            <label class="form-label">
+                Описание задачи
+            </label>
+            <textarea name="description" type="text" class="form-control" rows="3"></textarea>
+        </div>
+    <button id="createTask" class="btn btn-secondary">Добавить задачу</button>
+    </form>
+
+    @section Scripts{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+        $('#createTask').on('click', function (e) {
+                e.preventDefault();
+                $.ajax({
+                type:'POST',
+                url: '@Url.Action("Create", "Task")',
+                data: $('#createTaskForm').serialize(),
+                success: function(response){
+                    Swal.fire({
+                        title: "Info",
+                        text: response.description,
+                        icon: 'success',
+                        confirmButtonText: "Ok"
+
+                    })
+                },
+                error: function(response)
+                {
+                    Swal.fire({
+                        title: "Info",
+                        text: response.responseJSON.description,
+                        icon: 'error',
+                        confirmButtonText: "Ok"
+
+                    })
+                }
+                })
+            });
+        </script>
+    }
