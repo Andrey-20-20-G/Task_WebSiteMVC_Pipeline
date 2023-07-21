@@ -29,5 +29,12 @@ namespace Task_WebSiteMVC_Pipeline.Controllers
             }
             return BadRequest(new { description = response.Description });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> TaskHandler()
+        {
+            var response = await _taskService.GetTask();
+            return Json(new { data = response.Data});
+        }
     }
 }

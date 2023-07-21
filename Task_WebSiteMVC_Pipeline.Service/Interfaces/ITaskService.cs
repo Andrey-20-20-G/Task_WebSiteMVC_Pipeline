@@ -12,5 +12,7 @@ namespace Task_WebSiteMVC_Pipeline.Service.Interfaces
     public interface ITaskService
     {
         public Task<IBaseRepository<TaskEntity>> CreateTask(CreateTaskViewModel model);
+
+        Task<IBaseRepository<IEnumerable<TaskViewModel>>> GetTask();
     }
 }

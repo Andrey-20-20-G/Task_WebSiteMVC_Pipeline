@@ -5,6 +5,8 @@ using Task_WebSiteMVC_Pipeline.Domain.ViewModels.Task;
 using Task_WebSiteMVC_Pipeline.Service.Interfaces;
 using Task_WebSiteMVC_Pipeline.Domain.Enum;
 using Task_WebSiteMVC_Pipeline.Domain.Interfaces;
+using Task_WebSiteMVC_Pipeline.Extentions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Task_WebSiteMVC_Pipeline.Service.Implementations
 {
@@ -24,6 +26,7 @@ namespace Task_WebSiteMVC_Pipeline.Service.Implementations
         {
             try
             {
+                model.Validate();
                 _logger.LogInformation($"Запрос на создание задачи - {model.Name}");
 
                 var task = _repository.GetAll()
@@ -64,6 +67,41 @@ namespace Task_WebSiteMVC_Pipeline.Service.Implementations
                 _logger.LogError(ex, $"[TaskService.CreateTask]: {ex.Message}");
                 return new BaseResponse<TaskEntity>()
                 {
+                    Description = $"{ ex.Message}",
+                    StatusCode = StatusCode.ServerError
+                };
+            }
+        }
+
+        public async Task<IBaseRepository<IEnumerable<TaskViewModel>>> GetTask()
+        {
+            try
+            {
+                var task = await _repository.GetAll()
+                    .Select(x => new TaskViewModel()
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Description = x.Description,
+                        IsDone = x.IsDone == true ? "Готова" : "Не готова",
+                        Type= x.Type.GetDisplayName(),
+                        CreatedDate = x.CreatedDate.ToLongDateString()
+                    })
+                    .ToListAsync();
+
+                return new BaseResponse<IEnumerable<TaskViewModel>>()
+                {
+                    Data = task,
+                    StatusCode = StatusCode.Success
+                };
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, $"[TaskService.CreateTask]: {ex.Message}");
+                return new BaseResponse<IEnumerable<TaskViewModel>>()
+                {
+                    Description = $"{ex.Message}",
                     StatusCode = StatusCode.ServerError
                 };
             }
