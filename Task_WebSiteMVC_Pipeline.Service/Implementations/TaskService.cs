@@ -7,6 +7,8 @@ using Task_WebSiteMVC_Pipeline.Domain.Enum;
 using Task_WebSiteMVC_Pipeline.Domain.Interfaces;
 using Task_WebSiteMVC_Pipeline.Extentions;
 using Microsoft.EntityFrameworkCore;
+using Task_WebSiteMVC_Pipeline.Domain.Filters.Task;
+using Task_WebSiteMVC_Pipeline.Domain.Extentions;
 
 namespace Task_WebSiteMVC_Pipeline.Service.Implementations
 {
@@ -20,6 +22,38 @@ namespace Task_WebSiteMVC_Pipeline.Service.Implementations
         {
             _repository = repository;
             _logger = logger;
+        }
+
+        public async Task<IBaseRepository<bool>> CloseTask(long id)
+        {
+            try
+            {
+                var task = await _repository.GetAll().FirstOrDefaultAsync(x => x.Id == id);
+                if (task == null) 
+                {
+                    return new BaseResponse<bool>()
+                    {
+                        Description = $"Задача не найдена",
+                        StatusCode = StatusCode.TaskNotFound
+                    };
+                }
+                task.IsDone = true;
+                await _repository.Update(task);
+                return new BaseResponse<bool>()
+                {
+                    Description = $"Задача успешно закрыта",
+                    StatusCode = StatusCode.Success
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[TaskService.EndTask]: {ex.Message}");
+                return new BaseResponse<bool>()
+                {
+                    Description = $"{ex.Message}",
+                    StatusCode = StatusCode.ServerError
+                };
+            }
         }
 
         public async Task<IBaseRepository<TaskEntity>> CreateTask(CreateTaskViewModel model)
@@ -73,11 +107,14 @@ namespace Task_WebSiteMVC_Pipeline.Service.Implementations
             }
         }
 
-        public async Task<IBaseRepository<IEnumerable<TaskViewModel>>> GetTask()
+        public async Task<IBaseRepository<IEnumerable<TaskViewModel>>> GetTask(TaskFilter taskFilter)
         {
             try
             {
                 var task = await _repository.GetAll()
+                    .Where(x => !x.IsDone)
+                    .WhereIf(!string.IsNullOrWhiteSpace(taskFilter.Name), x => x.Name == taskFilter.Name)
+                    .WhereIf(taskFilter.TimeSpend.HasValue, x => x.Type == taskFilter.TimeSpend)
                     .Select(x => new TaskViewModel()
                     {
                         Id = x.Id,

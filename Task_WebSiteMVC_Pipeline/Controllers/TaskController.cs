@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Task_WebSiteMVC_Pipeline.Domain.Filters.Task;
 using Task_WebSiteMVC_Pipeline.Domain.ViewModels.Task;
 using Task_WebSiteMVC_Pipeline.Service.Interfaces;
 
@@ -31,10 +32,20 @@ namespace Task_WebSiteMVC_Pipeline.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> TaskHandler()
+        public async Task<IActionResult> TaskHandler(TaskFilter taskFilter)
         {
-            var response = await _taskService.GetTask();
+            var response = await _taskService.GetTask(taskFilter);
             return Json(new { data = response.Data});
+        }
+        [HttpPost]
+        public async Task<IActionResult> CloseTask(long id)
+        {
+            var response = await _taskService.CloseTask(id);
+            if (response.StatusCode == Domain.Enum.StatusCode.Success)
+            {
+                return Ok(new { description = response.Description });
+            }
+            return BadRequest(new { description = response.Description });
         }
     }
 }
