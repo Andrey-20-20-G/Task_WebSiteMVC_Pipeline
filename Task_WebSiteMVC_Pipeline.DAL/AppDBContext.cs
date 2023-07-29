@@ -13,7 +13,6 @@ namespace Task_WebSiteMVC_Pipeline.DAL
     {
         public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
-            
             Database.EnsureCreated();
         }
 
