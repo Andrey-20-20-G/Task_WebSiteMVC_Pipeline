@@ -9,6 +9,8 @@ using Task_WebSiteMVC_Pipeline.Extentions;
 using Microsoft.EntityFrameworkCore;
 using Task_WebSiteMVC_Pipeline.Domain.Filters.Task;
 using Task_WebSiteMVC_Pipeline.Domain.Extentions;
+using System.Globalization;
+using System.Threading.Tasks;
 
 namespace Task_WebSiteMVC_Pipeline.Service.Implementations
 {
@@ -22,6 +24,40 @@ namespace Task_WebSiteMVC_Pipeline.Service.Implementations
         {
             _repository = repository;
             _logger = logger;
+        }
+
+        public async Task<IBaseRepository<IEnumerable<TaskViewModel>>> CalculateCompletedTasks()
+        {
+            try
+            {
+                var task = await _repository.GetAll()
+                    .Where(x => x.CreatedDate.Date == DateTime.Today)
+                    .Select(x => new TaskViewModel()
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        IsDone = x.IsDone == true ? "Done" : "Not done",
+                        Description = x.Description,
+                        Type = x.Type.ToString(),
+                        CreatedDate = x.CreatedDate.ToString(CultureInfo.InvariantCulture),
+                    })
+                    .ToListAsync();
+
+                return new BaseResponse<IEnumerable<TaskViewModel>>()
+                {
+                    Data = task,
+                    StatusCode = StatusCode.Success
+                };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[TaskService.CalculateCompletedTasks]: {ex.Message}");
+                return new BaseResponse<IEnumerable<TaskViewModel>>()
+                {
+                    StatusCode = StatusCode.ServerError
+                };
+            }
         }
 
         public async Task<IBaseRepository<bool>> CloseTask(long id)
@@ -102,6 +138,38 @@ namespace Task_WebSiteMVC_Pipeline.Service.Implementations
                 return new BaseResponse<TaskEntity>()
                 {
                     Description = $"{ ex.Message}",
+                    StatusCode = StatusCode.ServerError
+                };
+            }
+        }
+
+        public async Task<IBaseRepository<IEnumerable<TaskViewModel>>> GetCompletedTask()
+        {
+            try
+            {
+                var tasks = await _repository.GetAll()
+                    .Where(x => x.IsDone)
+                    .Where(x => x.CreatedDate.Date == DateTime.Today)
+                    .Select(x => new TaskViewModel()
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        Description = x.Description.Substring(0, 5),
+                    })
+                    .ToListAsync();
+
+                return new BaseResponse<IEnumerable<TaskViewModel>>()
+                {
+                    Data = tasks,
+                    StatusCode = StatusCode.Success
+                };
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, $"[TaskService.GetCompletedTask]: {ex.Message}");
+                return new BaseResponse<IEnumerable<TaskViewModel>>()
+                {
                     StatusCode = StatusCode.ServerError
                 };
             }

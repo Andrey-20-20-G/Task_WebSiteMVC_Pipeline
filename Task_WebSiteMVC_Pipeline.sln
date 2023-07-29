@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Task_WebSiteMVC_Pipeline.Se
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DAL", "DAL", "{8D9EBCF5-BA6E-4109-91C8-B1F94845D2A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task_WebSiteMVC_Pipeline.DAL", "Task_WebSiteMVC_Pipeline.DAL\Task_WebSiteMVC_Pipeline.DAL.csproj", "{774B1995-D981-4BEC-8B09-F43583731BA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Task_WebSiteMVC_Pipeline.DAL", "Task_WebSiteMVC_Pipeline.DAL\Task_WebSiteMVC_Pipeline.DAL.csproj", "{774B1995-D981-4BEC-8B09-F43583731BA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

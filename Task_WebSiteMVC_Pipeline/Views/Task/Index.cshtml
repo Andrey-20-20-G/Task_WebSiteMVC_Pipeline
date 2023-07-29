@@ -113,14 +113,13 @@
                     var heandlerComplete = function(){
                     swalWithBootstrapButtons.fire({
                         title: 'Вы собираетесь завершить задачу?',
-                        text: "You won't be able to revert this!",
                         icon: 'warning',
                         confirmButtonText: 'Да',
                         reverseButtons: true
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $.ajax({
-                                Type: 'POST',
+                                type: 'POST',
                                 url: '@Url.Action("CloseTask")',
                                 data: {id: data.id},
                                 success: function (response) {
